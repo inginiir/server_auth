@@ -69,7 +69,7 @@ public class SessionServlet extends HttpServlet {
         } else {
             accountService.deleteSession(sessionId);
             resp.setContentType("text/html;charset=utf-8");
-            resp.getWriter().println("Poka!");
+            resp.getWriter().println("Bye!");
             resp.setStatus(HttpServletResponse.SC_OK);
         }
     }
