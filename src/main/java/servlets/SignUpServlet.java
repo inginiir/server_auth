@@ -1,8 +1,7 @@
 package servlets;
 
-import accounts.AccountService;
-import accounts.UserProfile;
-import com.google.gson.Gson;
+import dbservice.DBException;
+import dbservice.DBService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -12,10 +11,10 @@ import java.io.IOException;
 
 public class SignUpServlet extends HttpServlet {
 
-    private final AccountService accountService;
+    private final DBService dbService;
 
-    public SignUpServlet(AccountService accountService) {
-        this.accountService = accountService;
+    public SignUpServlet(DBService dbService) {
+        this.dbService = dbService;
     }
 
     @Override
@@ -27,16 +26,23 @@ public class SignUpServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        if (accountService.getUserByLogin(login) == null) {
-            accountService.addNewUser(new UserProfile(login, password, ""));
+        long id = 0L;
+
+        try {
+            id = dbService.addUser(login, password);
+        } catch (DBException e) {
+            e.printStackTrace();
+        }
+        if (id != 0) {
             resp.setContentType("text/html;charset=utf-8");
             resp.getWriter().println("Successfully sign up");
             resp.setStatus(HttpServletResponse.SC_OK);
         } else {
             resp.setContentType("text/html;charset=utf-8");
-            resp.getWriter().println("User " + login + " already exist");
+            resp.getWriter().println("Error of enter");
             resp.setStatus(HttpServletResponse.SC_OK);
         }
+
     }
 
     @Override

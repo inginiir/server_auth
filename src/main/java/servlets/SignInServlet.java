@@ -1,7 +1,8 @@
 package servlets;
 
-import accounts.AccountService;
-import accounts.UserProfile;
+import dbservice.DBException;
+import dbservice.DBService;
+import dbservice.dataSets.UserDataSet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -10,10 +11,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class SignInServlet extends HttpServlet {
-    private final AccountService accountService;
+    private final DBService dbService;
 
-    public SignInServlet(AccountService accountService) {
-        this.accountService = accountService;
+    public SignInServlet(DBService dbService) {
+        this.dbService = dbService;
     }
 
     @Override
@@ -25,7 +26,13 @@ public class SignInServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        if (accountService.getUserByLogin(login) != null && password.equals(accountService.getUserByLogin(login).getPassword())) {
+        UserDataSet dataSet = null;
+        try {
+            dataSet = dbService.getUser(login);
+        } catch (DBException e) {
+            e.printStackTrace();
+        }
+        if (dataSet != null && dataSet.getPassword().equals(password)) {
             resp.setContentType("text/html;charset=utf-8");
             resp.getWriter().println("Authorized: " + login);
             resp.setStatus(HttpServletResponse.SC_OK);
@@ -33,7 +40,6 @@ public class SignInServlet extends HttpServlet {
             resp.setContentType("text/html;charset=utf-8");
             resp.getWriter().println("Unauthorized");
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
         }
     }
 }
